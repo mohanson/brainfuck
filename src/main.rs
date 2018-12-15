@@ -7,11 +7,10 @@ use std::io::prelude::*;
 use std::io::BufReader;
 
 #[derive(Debug)]
-pub enum Error {
+enum Error {
     IO(io::Error),
     InvalidOpcode,
     OutOfStack,
-    Unknown,
 }
 impl error::Error for Error {}
 impl fmt::Display for Error {
@@ -20,7 +19,6 @@ impl fmt::Display for Error {
             Error::IO(err) => return write!(f, "{}", err),
             Error::InvalidOpcode => return write!(f, "InvalidOpcode"),
             Error::OutOfStack => return write!(f, "OutOfStack"),
-            Error::Unknown => return write!(f, "Unknown"),
         };
     }
 }
@@ -30,7 +28,6 @@ impl From<io::Error> for Error {
     }
 }
 
-#[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 enum Opcode {
     SHR = 0x3E,
     SHL = 0x3C,
@@ -43,7 +40,7 @@ enum Opcode {
 }
 
 impl Opcode {
-    fn from(u: u8) -> Option<Self> {
+    fn from_u8(u: u8) -> Option<Self> {
         match u {
             0x3E => Some(Opcode::SHR),
             0x3C => Some(Opcode::SHL),
@@ -78,7 +75,7 @@ impl Interpreter {
             if pc >= code.len() {
                 break;
             }
-            let r = Opcode::from(code[pc]);
+            let r = Opcode::from_u8(code[pc]);
             if r.is_none() {
                 return Err(Error::InvalidOpcode);
             }
@@ -107,12 +104,15 @@ impl Interpreter {
                 Opcode::GETCHAR => {
                     let mut buf: Vec<u8> = vec![0; 1];
                     io::stdin().read_exact(&mut buf)?;
-                    self.stack[ps] = buf[1];
+                    self.stack[ps] = buf[0];
                 }
                 Opcode::LB => {
                     if self.stack[ps] == 0x00 {
                         loop {
                             pc += 1;
+                            if pc >= code.len() {
+                                return Err(Error::OutOfStack);
+                            }
                             if code[pc] == Opcode::RB as u8 {
                                 break;
                             }
@@ -123,6 +123,9 @@ impl Interpreter {
                     if self.stack[ps] != 0x00 {
                         loop {
                             pc -= 1;
+                            if pc >= code.len() {
+                                return Err(Error::OutOfStack);
+                            }
                             if code[pc] == Opcode::LB as u8 {
                                 break;
                             }
@@ -148,14 +151,4 @@ fn main() {
     }
     let mut it = Interpreter::default();
     it.exec(buf).unwrap();
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    #[test]
-    fn test_main() {
-        let mut it = Interpreter::default();
-        it.exec(Vec::from("++++++++++[>+++++++>++++++++++>+++>+<<<<-]>++.>+.+++++++..+++.>++.<<+++++++++++++++.>.+++.------.--------.>+.>.".as_bytes())).unwrap();
-    }
 }

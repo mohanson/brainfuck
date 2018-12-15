@@ -15,9 +15,8 @@ A program to print "Hello World!":
 >.+++.------.--------.>+.>.
 ```
 
-save the code to file, and then
+Run it:
 
 ```
-$ cargo build
-$ ./target/debug/brainfuck [SOURCE]
+$ cargo run ./res/hello_world.bf
 ```
