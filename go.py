@@ -15,5 +15,9 @@ def main():
     call('cargo build')
 
 
+def test():
+    call('cargo run ./res/sierpinski.bf')
+
+
 if __name__ == '__main__':
     main()
