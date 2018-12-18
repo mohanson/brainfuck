@@ -53,7 +53,7 @@ impl Opcode {
         }
     }
 
-    fn into_u8(&self) -> u8 {
+    fn into_u8(self) -> u8 {
         match self {
             Opcode::SHR => 0x3E,
             Opcode::SHL => 0x3C,
@@ -80,11 +80,11 @@ impl std::default::Default for Interpreter {
 impl Interpreter {
     fn cls(&self, code: Vec<u8>) -> Vec<u8> {
         code.into_iter()
-            .clone()
             .filter(|x| Opcode::from_u8(*x).is_some())
             .collect()
     }
 
+    #[allow(clippy::needless_pass_by_value)]
     fn bap(&self, code: Vec<u8>) -> Result<collections::HashMap<usize, usize>, Error> {
         let mut temp: Vec<usize> = Vec::new();
         let mut bmap: collections::HashMap<usize, usize> = collections::HashMap::new();
@@ -137,12 +137,12 @@ impl Interpreter {
                     }
                     Opcode::LB => {
                         if self.stack[ps] == 0x00 {
-                            pc = *bmap.get(&pc).unwrap();
+                            pc = bmap[&pc];
                         }
                     }
                     Opcode::RB => {
                         if self.stack[ps] != 0x00 {
-                            pc = *bmap.get(&pc).unwrap();
+                            pc = bmap[&pc];
                         }
                     }
                 }
