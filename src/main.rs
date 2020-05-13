@@ -6,6 +6,8 @@ use std::fs;
 use std::io;
 use std::io::prelude::*;
 
+mod opcode;
+
 #[derive(Debug)]
 enum Error {
     IO(io::Error),
@@ -26,47 +28,6 @@ impl From<io::Error> for Error {
     }
 }
 
-#[derive(PartialEq)]
-enum Opcode {
-    SHR = 0x3E,
-    SHL = 0x3C,
-    ADD = 0x2B,
-    SUB = 0x2D,
-    PUTCHAR = 0x2E,
-    GETCHAR = 0x2C,
-    LB = 0x5B,
-    RB = 0x5D,
-}
-
-impl Opcode {
-    fn from_u8(u: u8) -> Option<Self> {
-        match u {
-            0x3E => Some(Opcode::SHR),
-            0x3C => Some(Opcode::SHL),
-            0x2B => Some(Opcode::ADD),
-            0x2D => Some(Opcode::SUB),
-            0x2E => Some(Opcode::PUTCHAR),
-            0x2C => Some(Opcode::GETCHAR),
-            0x5B => Some(Opcode::LB),
-            0x5D => Some(Opcode::RB),
-            _ => None,
-        }
-    }
-
-    fn into_u8(self) -> u8 {
-        match self {
-            Opcode::SHR => 0x3E,
-            Opcode::SHL => 0x3C,
-            Opcode::ADD => 0x2B,
-            Opcode::SUB => 0x2D,
-            Opcode::PUTCHAR => 0x2E,
-            Opcode::GETCHAR => 0x2C,
-            Opcode::LB => 0x5B,
-            Opcode::RB => 0x5D,
-        }
-    }
-}
-
 struct Interpreter {
     stack: Vec<u8>,
 }
@@ -80,7 +41,7 @@ impl std::default::Default for Interpreter {
 impl Interpreter {
     fn cls(&self, code: Vec<u8>) -> Vec<u8> {
         code.into_iter()
-            .filter(|x| Opcode::from_u8(*x).is_some())
+            .filter(|x| opcode::Opcode::from_u8(*x).is_some())
             .collect()
     }
 
@@ -89,10 +50,10 @@ impl Interpreter {
         let mut temp: Vec<usize> = Vec::new();
         let mut bmap: collections::HashMap<usize, usize> = collections::HashMap::new();
         for (i, e) in code.iter().enumerate() {
-            if &Opcode::LB.into_u8() == e {
+            if &opcode::Opcode::LB.into_u8() == e {
                 temp.push(i);
             }
-            if &Opcode::RB.into_u8() == e {
+            if &opcode::Opcode::RB.into_u8() == e {
                 let j = temp.pop().ok_or(Error::Syntax)?;
                 bmap.insert(j, i);
                 bmap.insert(i, j);
@@ -111,36 +72,36 @@ impl Interpreter {
             if pc >= code.len() {
                 break;
             }
-            let r = Opcode::from_u8(code[pc]);
+            let r = opcode::Opcode::from_u8(code[pc]);
             if let Some(op) = r {
                 match op {
-                    Opcode::SHL => ps = if ps == 0 { 0 } else { ps - 1 },
-                    Opcode::SHR => {
+                    opcode::Opcode::SHL => ps = if ps == 0 { 0 } else { ps - 1 },
+                    opcode::Opcode::SHR => {
                         ps += 1;
                         if ps == self.stack.len() {
                             self.stack.push(0)
                         }
                     }
-                    Opcode::ADD => {
+                    opcode::Opcode::ADD => {
                         self.stack[ps] = self.stack[ps].overflowing_add(1).0;
                     }
-                    Opcode::SUB => {
+                    opcode::Opcode::SUB => {
                         self.stack[ps] = self.stack[ps].overflowing_sub(1).0;
                     }
-                    Opcode::PUTCHAR => {
+                    opcode::Opcode::PUTCHAR => {
                         io::stdout().write_all(&[self.stack[ps]])?;
                     }
-                    Opcode::GETCHAR => {
+                    opcode::Opcode::GETCHAR => {
                         let mut buf: Vec<u8> = vec![0; 1];
                         io::stdin().read_exact(&mut buf)?;
                         self.stack[ps] = buf[0];
                     }
-                    Opcode::LB => {
+                    opcode::Opcode::LB => {
                         if self.stack[ps] == 0x00 {
                             pc = bmap[&pc];
                         }
                     }
-                    Opcode::RB => {
+                    opcode::Opcode::RB => {
                         if self.stack[ps] != 0x00 {
                             pc = bmap[&pc];
                         }
