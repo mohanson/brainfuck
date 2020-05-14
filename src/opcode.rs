@@ -40,3 +40,20 @@ impl Into<u8> for Opcode {
         }
     }
 }
+
+pub fn from(code: Vec<u8>) -> Vec<Opcode> {
+    let dict: Vec<u8> = vec![
+        Opcode::SHL.into(),
+        Opcode::SHR.into(),
+        Opcode::ADD.into(),
+        Opcode::SUB.into(),
+        Opcode::GETCHAR.into(),
+        Opcode::PUTCHAR.into(),
+        Opcode::LB.into(),
+        Opcode::RB.into(),
+    ];
+    code.iter()
+        .filter(|x| dict.contains(x))
+        .map(|x| Opcode::from(*x))
+        .collect()
+}

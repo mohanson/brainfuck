@@ -9,22 +9,7 @@ struct Code {
 
 impl Code {
     fn from(data: Vec<u8>) -> Result<Self, Box<dyn std::error::Error>> {
-        let dict: Vec<u8> = vec![
-            opcode::Opcode::SHL.into(),
-            opcode::Opcode::SHR.into(),
-            opcode::Opcode::ADD.into(),
-            opcode::Opcode::SUB.into(),
-            opcode::Opcode::GETCHAR.into(),
-            opcode::Opcode::PUTCHAR.into(),
-            opcode::Opcode::LB.into(),
-            opcode::Opcode::RB.into(),
-        ];
-        let instrs: Vec<opcode::Opcode> = data
-            .iter()
-            .filter(|x| dict.contains(x))
-            .map(|x| opcode::Opcode::from(*x))
-            .collect();
-
+        let instrs = opcode::from(data);
         let mut jstack: Vec<usize> = Vec::new();
         let mut jtable: std::collections::HashMap<usize, usize> = std::collections::HashMap::new();
         for (i, e) in instrs.iter().enumerate() {

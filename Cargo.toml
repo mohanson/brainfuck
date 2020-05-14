@@ -3,5 +3,14 @@ name = "brainfuck"
 version = "0.1.0"
 authors = ["mohanson <mohanson@outlook.com>"]
 edition = "2018"
+default-run = "brainfuck_interpreter"
+
+[[bin]]
+name = "brainfuck_interpreter"
+path = "src/main_interpreter.rs"
+
+[[bin]]
+name = "brainfuck_ir"
+path = "src/main_ir.rs"
 
 [dependencies]
