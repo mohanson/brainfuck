@@ -8,7 +8,7 @@ struct Code {
 }
 
 impl Code {
-    fn from(data: Vec<u8>) -> Self {
+    fn from(data: Vec<u8>) -> Result<Self, Box<dyn std::error::Error>> {
         let dict: Vec<u8> = vec![
             opcode::Opcode::SHL.into(),
             opcode::Opcode::SHR.into(),
@@ -32,13 +32,13 @@ impl Code {
                 jstack.push(i);
             }
             if opcode::Opcode::RB == *e {
-                let j = jstack.pop().unwrap();
+                let j = jstack.pop().ok_or("pop from empty list")?;
                 jtable.insert(j, i);
                 jtable.insert(i, j);
             }
         }
 
-        Code { instrs, jtable }
+        Ok(Code { instrs, jtable })
     }
 }
 
@@ -54,7 +54,7 @@ impl std::default::Default for Interpreter {
 
 impl Interpreter {
     fn run(&mut self, code: Vec<u8>) -> Result<(), Box<dyn std::error::Error>> {
-        let code = Code::from(code);
+        let code = Code::from(code)?;
         let code_len = code.instrs.len();
         let mut pc = 0;
         let mut ps = 0;
@@ -63,13 +63,7 @@ impl Interpreter {
                 break;
             }
             match code.instrs[pc] {
-                opcode::Opcode::SHL => {
-                    if ps == 0 {
-                        ps = 0
-                    } else {
-                        ps = ps - 1
-                    }
-                }
+                opcode::Opcode::SHL => ps = if ps == 0 { 0 } else { ps - 1 },
                 opcode::Opcode::SHR => {
                     ps += 1;
                     if ps == self.stack.len() {
