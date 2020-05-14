@@ -1,4 +1,4 @@
-#[derive(PartialEq)]
+#[derive(Debug, PartialEq)]
 pub enum Opcode {
     SHR = 0x3E,
     SHL = 0x3C,
@@ -10,22 +10,24 @@ pub enum Opcode {
     RB = 0x5D,
 }
 
-impl Opcode {
-    pub fn from_u8(u: u8) -> Option<Self> {
+impl From<u8> for Opcode {
+    fn from(u: u8) -> Self {
         match u {
-            0x3E => Some(Opcode::SHR),
-            0x3C => Some(Opcode::SHL),
-            0x2B => Some(Opcode::ADD),
-            0x2D => Some(Opcode::SUB),
-            0x2E => Some(Opcode::PUTCHAR),
-            0x2C => Some(Opcode::GETCHAR),
-            0x5B => Some(Opcode::LB),
-            0x5D => Some(Opcode::RB),
-            _ => None,
+            0x3E => Opcode::SHR,
+            0x3C => Opcode::SHL,
+            0x2B => Opcode::ADD,
+            0x2D => Opcode::SUB,
+            0x2E => Opcode::PUTCHAR,
+            0x2C => Opcode::GETCHAR,
+            0x5B => Opcode::LB,
+            0x5D => Opcode::RB,
+            _ => panic!(),
         }
     }
+}
 
-    pub fn into_u8(self) -> u8 {
+impl Into<u8> for Opcode {
+    fn into(self) -> u8 {
         match self {
             Opcode::SHR => 0x3E,
             Opcode::SHL => 0x3C,
