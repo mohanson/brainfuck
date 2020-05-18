@@ -76,7 +76,7 @@ impl Code {
                             *x = (instrs_len - 1) as u32;
                         }
                         _ => {
-                            panic!("");
+                            unimplemented!();
                         }
                     }
                 }
