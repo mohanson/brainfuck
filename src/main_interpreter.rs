@@ -2,31 +2,6 @@ use std::io::prelude::*;
 
 mod opcode;
 
-struct Code {
-    instrs: Vec<opcode::Opcode>,
-    jtable: std::collections::HashMap<usize, usize>,
-}
-
-impl Code {
-    fn from(data: Vec<u8>) -> Result<Self, Box<dyn std::error::Error>> {
-        let instrs = opcode::from(data);
-        let mut jstack: Vec<usize> = Vec::new();
-        let mut jtable: std::collections::HashMap<usize, usize> = std::collections::HashMap::new();
-        for (i, e) in instrs.iter().enumerate() {
-            if opcode::Opcode::LB == *e {
-                jstack.push(i);
-            }
-            if opcode::Opcode::RB == *e {
-                let j = jstack.pop().ok_or("pop from empty list")?;
-                jtable.insert(j, i);
-                jtable.insert(i, j);
-            }
-        }
-
-        Ok(Code { instrs, jtable })
-    }
-}
-
 struct Interpreter {
     stack: Vec<u8>,
 }
@@ -39,7 +14,7 @@ impl std::default::Default for Interpreter {
 
 impl Interpreter {
     fn run(&mut self, code: Vec<u8>) -> Result<(), Box<dyn std::error::Error>> {
-        let code = Code::from(code)?;
+        let code = opcode::Code::from(code)?;
         let code_len = code.instrs.len();
         let mut pc = 0;
         let mut ps = 0;

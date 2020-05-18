@@ -41,19 +41,40 @@ impl Into<u8> for Opcode {
     }
 }
 
-pub fn from(code: Vec<u8>) -> Vec<Opcode> {
-    let dict: Vec<u8> = vec![
-        Opcode::SHL.into(),
-        Opcode::SHR.into(),
-        Opcode::ADD.into(),
-        Opcode::SUB.into(),
-        Opcode::GETCHAR.into(),
-        Opcode::PUTCHAR.into(),
-        Opcode::LB.into(),
-        Opcode::RB.into(),
-    ];
-    code.iter()
-        .filter(|x| dict.contains(x))
-        .map(|x| Opcode::from(*x))
-        .collect()
+pub struct Code {
+    pub instrs: Vec<Opcode>,
+    pub jtable: std::collections::HashMap<usize, usize>,
+}
+
+impl Code {
+    pub fn from(data: Vec<u8>) -> Result<Self, Box<dyn std::error::Error>> {
+        let dict: Vec<u8> = vec![
+            Opcode::SHL.into(),
+            Opcode::SHR.into(),
+            Opcode::ADD.into(),
+            Opcode::SUB.into(),
+            Opcode::GETCHAR.into(),
+            Opcode::PUTCHAR.into(),
+            Opcode::LB.into(),
+            Opcode::RB.into(),
+        ];
+        let instrs: Vec<Opcode> = data
+            .iter()
+            .filter(|x| dict.contains(x))
+            .map(|x| Opcode::from(*x))
+            .collect();
+        let mut jstack: Vec<usize> = Vec::new();
+        let mut jtable: std::collections::HashMap<usize, usize> = std::collections::HashMap::new();
+        for (i, e) in instrs.iter().enumerate() {
+            if Opcode::LB == *e {
+                jstack.push(i);
+            }
+            if Opcode::RB == *e {
+                let j = jstack.pop().ok_or("pop from empty list")?;
+                jtable.insert(j, i);
+                jtable.insert(i, j);
+            }
+        }
+        Ok(Code { instrs, jtable })
+    }
 }
