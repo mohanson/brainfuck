@@ -1,6 +1,6 @@
 use std::io::prelude::*;
 
-mod opcode;
+use brainfuck::opcode;
 
 struct Interpreter {
     stack: Vec<u8>,
@@ -13,8 +13,8 @@ impl std::default::Default for Interpreter {
 }
 
 impl Interpreter {
-    fn run(&mut self, code: Vec<u8>) -> Result<(), Box<dyn std::error::Error>> {
-        let code = opcode::Code::from(code)?;
+    fn run(&mut self, data: Vec<u8>) -> Result<(), Box<dyn std::error::Error>> {
+        let code = opcode::Code::from(data)?;
         let code_len = code.instrs.len();
         let mut pc = 0;
         let mut ps = 0;

@@ -1,4 +1,4 @@
-use crate::opcode;
+use super::opcode;
 
 #[derive(Debug, PartialEq)]
 pub enum IR {
