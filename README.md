@@ -7,11 +7,11 @@ The language's name is a reference to the slang term brainfuck, which refers to 
 
 This project provides three ways to execute BF code:
 
-- Raw interpreter
+- Raw interpreter without any trick
 - Optimized IR
 - JIT
 
-# Interpreter
+# Raw interpreter without any trick
 
 ```
 $ cargo run --release --bin brainfuck_interpreter ./res/mandelbrot.bf
@@ -19,7 +19,7 @@ $ cargo run --release --bin brainfuck_interpreter ./res/mandelbrot.bf
 
 ![img](/res/mandelbrot_interpreter.gif)
 
-# IR
+# Optimized IR
 
 ```
 $ cargo run --release --bin brainfuck_ir ./res/mandelbrot.bf
