@@ -18,7 +18,6 @@ impl Interpreter {
     fn run(&mut self, data: Vec<u8>) -> Result<(), Box<dyn std::error::Error>> {
         let opcode_code = opcode::Code::from(data)?;
         let code = ir::Code::from(opcode_code.instrs)?;
-        let code_len = code.instrs.len();
         let mut loops = vec![];
 
         let mut ops = dynasmrt::x64::Assembler::new()?;
@@ -55,7 +54,7 @@ impl Interpreter {
                     ; mov  rcx, r15
                 ),
                 ir::IR::GETCHAR => {}
-                ir::IR::JIZ(x) => {
+                ir::IR::JIZ(_) => {
                     let l = ops.new_dynamic_label();
                     let r = ops.new_dynamic_label();
                     loops.push((l, r));
@@ -65,7 +64,7 @@ impl Interpreter {
                         ; => l
                     )
                 }
-                ir::IR::JNZ(x) => {
+                ir::IR::JNZ(_) => {
                     let (l, r) = loops.pop().unwrap();
                     dynasm!(ops
                         ; cmp BYTE [rcx], 0
