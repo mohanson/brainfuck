@@ -5,18 +5,36 @@ The language consists of only eight simple commands and an instruction pointer. 
 
 The language's name is a reference to the slang term brainfuck, which refers to things so complicated or unusual that they exceed the limits of one's understanding.
 
-# Usage
+This project provides three ways to execute BF code:
 
-A program to print "Hello World!":
+- Raw interpreter
+- Optimized IR
+- JIT
 
-```
-++++++++++[>+++++++>++++++++++>+++>+<<<<-]
->++.>+.+++++++..+++.>++.<<+++++++++++++++.
->.+++.------.--------.>+.>.
-```
-
-Run it:
+# Interpreter
 
 ```
-$ cargo run ./res/hello_world.bf
+$ cargo run --release --bin brainfuck_interpreter ./res/mandelbrot.bf
 ```
+
+![img](/res/mandelbrot_interpreter.bf)
+
+# IR
+
+```
+$ cargo run --release --bin brainfuck_ir ./res/mandelbrot.bf
+```
+
+![img](/res/mandelbrot_ir.bf)
+
+# JIT
+
+```
+$ cargo run --release --bin brainfuck_jit ./res/mandelbrot.bf
+```
+
+![img](/res/mandelbrot_interpreter.bf)
+
+# Licences
+
+MIT

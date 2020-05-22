@@ -85,6 +85,10 @@ impl Interpreter {
         let fun: extern "sysv64" fn(memory_addr_from: *mut u8, memory_addr_to: *mut u8) =
             unsafe { std::mem::transmute(exec_buffer.ptr(entry_point)) };
         fun(memory_addr_from, memory_addr_to);
+
+        drop(exec_buffer);
+        drop(memory);
+
         Ok(())
     }
 }
