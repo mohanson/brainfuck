@@ -13,4 +13,11 @@ path = "src/main_interpreter.rs"
 name = "brainfuck_ir"
 path = "src/main_ir.rs"
 
+[[bin]]
+name = "brainfuck_jit"
+path = "src/main_jit.rs"
+
 [dependencies]
+dynasm = "0.6"
+dynasmrt = "0.6"
+itertools = "*"
