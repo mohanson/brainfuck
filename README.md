@@ -17,7 +17,7 @@ This project provides three ways to execute BF code:
 $ cargo run --release --bin brainfuck_interpreter ./res/mandelbrot.bf
 ```
 
-![img](/res/mandelbrot_interpreter.bf)
+![img](/res/mandelbrot_interpreter.gif)
 
 # IR
 
@@ -25,7 +25,7 @@ $ cargo run --release --bin brainfuck_interpreter ./res/mandelbrot.bf
 $ cargo run --release --bin brainfuck_ir ./res/mandelbrot.bf
 ```
 
-![img](/res/mandelbrot_ir.bf)
+![img](/res/mandelbrot_ir.gif)
 
 # JIT
 
@@ -33,7 +33,7 @@ $ cargo run --release --bin brainfuck_ir ./res/mandelbrot.bf
 $ cargo run --release --bin brainfuck_jit ./res/mandelbrot.bf
 ```
 
-![img](/res/mandelbrot_interpreter.bf)
+![img](/res/mandelbrot_interpreter.gif)
 
 # Licences
 
