@@ -33,7 +33,7 @@ $ cargo run --release --bin brainfuck_ir ./res/mandelbrot.bf
 $ cargo run --release --bin brainfuck_jit ./res/mandelbrot.bf
 ```
 
-![img](/res/mandelbrot_interpreter.gif)
+![img](/res/mandelbrot_jit.gif)
 
 # Licences
 
