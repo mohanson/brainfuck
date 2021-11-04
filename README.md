@@ -9,7 +9,7 @@ This project provides three ways to execute BF code:
 
 - Raw interpreter without any trick
 - Optimized IR
-- JIT
+- JIT(x64 only)
 
 # Raw interpreter without any trick
 
