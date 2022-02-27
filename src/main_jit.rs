@@ -46,7 +46,9 @@ impl Interpreter {
                     ; mov r12, rcx
                     ; mov rdi, [rcx]
                     ; mov rax, QWORD putchar as _
+                    ; sub rsp, BYTE 0x28 // See https://coding.imooc.com/learn/questiondetail/259971.html
                     ; call rax
+                    ; add rsp, BYTE 0x28
                     ; mov rcx, r12
                 ),
                 ir::IR::GETCHAR => {}
