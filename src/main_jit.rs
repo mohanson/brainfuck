@@ -1,4 +1,3 @@
-#![feature(proc_macro_hygiene)]
 use std::io::prelude::*;
 
 use dynasm::dynasm;
@@ -23,6 +22,9 @@ impl Interpreter {
         let mut ops = dynasmrt::x64::Assembler::new()?;
         let entry_point = ops.offset();
 
+        // To understand the code below, you may want to read
+        // https://en.wikipedia.org/wiki/X86_calling_conventions#System_V_AMD64_ABI first.
+
         dynasm!(ops
             ; .arch x64
             ; mov rcx, rdi
@@ -43,13 +45,13 @@ impl Interpreter {
                     ; sub BYTE [rcx], x as i8 // sp* -= x
                 ),
                 ir::IR::PUTCHAR => dynasm!(ops
-                    ; mov r12, rcx
-                    ; mov rdi, [rcx]
-                    ; mov rax, QWORD putchar as _
-                    ; sub rsp, BYTE 0x28 // See https://coding.imooc.com/learn/questiondetail/259971.html
+                    ; push rcx
+                    ; mov  rdi, [rcx]
+                    ; mov  rax, QWORD putchar as _
+                    ; sub  rsp, BYTE 0x28 // See https://coding.imooc.com/learn/questiondetail/259971.html
                     ; call rax
-                    ; add rsp, BYTE 0x28
-                    ; mov rcx, r12
+                    ; add  rsp, BYTE 0x28
+                    ; pop  rcx
                 ),
                 ir::IR::GETCHAR => {}
                 ir::IR::JIZ(_) => {
@@ -58,7 +60,7 @@ impl Interpreter {
                     loops.push((l, r));
                     dynasm!(ops
                         ; cmp BYTE [rcx], 0
-                        ; jz => r
+                        ; jz  => r
                         ; => l
                     )
                 }
@@ -79,10 +81,9 @@ impl Interpreter {
         let exec_buffer = ops.finalize().unwrap();
         let mut memory: Box<[u8]> = vec![0; 65536].into_boxed_slice();
         let memory_addr_from = memory.as_mut_ptr();
-        let memory_addr_to = unsafe { memory_addr_from.add(memory.len()) };
-        let fun: fn(memory_addr_from: *mut u8, memory_addr_to: *mut u8) =
+        let fun: fn(memory_addr_from: *mut u8) =
             unsafe { std::mem::transmute(exec_buffer.ptr(entry_point)) };
-        fun(memory_addr_from, memory_addr_to);
+        fun(memory_addr_from);
 
         Ok(())
     }
