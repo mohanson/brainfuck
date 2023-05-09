@@ -2,7 +2,7 @@
 name = "brainfuck"
 version = "0.1.0"
 authors = ["mohanson <mohanson@outlook.com>"]
-edition = "2018"
+edition = "2021"
 default-run = "brainfuck_interpreter"
 
 [[bin]]
@@ -18,6 +18,5 @@ name = "brainfuck_jit"
 path = "src/main_jit.rs"
 
 [dependencies]
-dynasm = "0.6"
-dynasmrt = "0.6"
-itertools = "*"
+dynasm = "2.0"
+dynasmrt = "2.0"
