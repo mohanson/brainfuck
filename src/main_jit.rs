@@ -23,35 +23,32 @@ impl Interpreter {
         let entry_point = ops.offset();
 
         // To understand the code below, you may want to read
-        // https://en.wikipedia.org/wiki/X86_calling_conventions#System_V_AMD64_ABI first.
+        // https://en.wikipedia.org/wiki/X86_calling_conventions#System_V_AMD64_ABI.
 
         dynasm!(ops
             ; .arch x64
-            ; mov rcx, rdi
+            ; push  rbx
+            ; mov   rbx, rdi
         );
 
         for ir in code.instrs {
             match ir {
                 ir::IR::SHL(x) => dynasm!(ops
-                    ; sub rcx, x as i32 // sp -= x
+                    ; sub rbx, x as i32 // sp -= x
                 ),
                 ir::IR::SHR(x) => dynasm!(ops
-                    ; add rcx, x as i32 // sp += x
+                    ; add rbx, x as i32 // sp += x
                 ),
                 ir::IR::ADD(x) => dynasm!(ops
-                    ; add BYTE [rcx], x as i8 // sp* += x
+                    ; add BYTE [rbx], x as i8 // sp* += x
                 ),
                 ir::IR::SUB(x) => dynasm!(ops
-                    ; sub BYTE [rcx], x as i8 // sp* -= x
+                    ; sub BYTE [rbx], x as i8 // sp* -= x
                 ),
                 ir::IR::PUTCHAR => dynasm!(ops
-                    ; push rcx
-                    ; mov  rdi, [rcx]
+                    ; mov  rdi, [rbx]
                     ; mov  rax, QWORD putchar as _
-                    ; sub  rsp, BYTE 0x28 // See https://coding.imooc.com/learn/questiondetail/259971.html
                     ; call rax
-                    ; add  rsp, BYTE 0x28
-                    ; pop  rcx
                 ),
                 ir::IR::GETCHAR => {}
                 ir::IR::JIZ(_) => {
@@ -59,30 +56,30 @@ impl Interpreter {
                     let r = ops.new_dynamic_label();
                     loops.push((l, r));
                     dynasm!(ops
-                        ; cmp BYTE [rcx], 0
+                        ; cmp BYTE [rbx], 0
                         ; jz  => r
-                        ; => l
+                        ;     => l
                     )
                 }
                 ir::IR::JNZ(_) => {
                     let (l, r) = loops.pop().unwrap();
                     dynasm!(ops
-                        ; cmp BYTE [rcx], 0
+                        ; cmp BYTE [rbx], 0
                         ; jnz => l
-                        ; => r
+                        ;     => r
                     )
                 }
             }
         }
         dynasm!(ops
+            ; pop rbx
             ; ret
         );
 
         let exec_buffer = ops.finalize().unwrap();
         let mut memory: Box<[u8]> = vec![0; 65536].into_boxed_slice();
         let memory_addr_from = memory.as_mut_ptr();
-        let fun: fn(memory_addr_from: *mut u8) =
-            unsafe { std::mem::transmute(exec_buffer.ptr(entry_point)) };
+        let fun: fn(memory_addr_from: *mut u8) = unsafe { std::mem::transmute(exec_buffer.ptr(entry_point)) };
         fun(memory_addr_from);
 
         Ok(())

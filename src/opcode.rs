@@ -58,11 +58,7 @@ impl Code {
             Opcode::LB.into(),
             Opcode::RB.into(),
         ];
-        let instrs: Vec<Opcode> = data
-            .iter()
-            .filter(|x| dict.contains(x))
-            .map(|x| Opcode::from(*x))
-            .collect();
+        let instrs: Vec<Opcode> = data.iter().filter(|x| dict.contains(x)).map(|x| Opcode::from(*x)).collect();
         let mut jstack: Vec<usize> = Vec::new();
         let mut jtable: std::collections::HashMap<usize, usize> = std::collections::HashMap::new();
         for (i, e) in instrs.iter().enumerate() {
