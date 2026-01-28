@@ -10,6 +10,12 @@ unsafe extern "sysv64" fn putchar(char: u8) {
     std::io::stdout().write_all(&[char]).unwrap()
 }
 
+unsafe extern "sysv64" fn getchar() -> u8 {
+    let mut buf = [0u8; 1];
+    std::io::stdin().read_exact(&mut buf).unwrap();
+    buf[0]
+}
+
 #[derive(Default)]
 struct Interpreter {}
 
@@ -46,11 +52,15 @@ impl Interpreter {
                     ; sub BYTE [rbx], x as i8 // sp* -= x
                 ),
                 ir::IR::PUTCHAR => dynasm!(ops
-                    ; mov  rdi, [rbx]
-                    ; mov  rax, QWORD putchar as _
-                    ; call rax
+                    ; movzx rdi, BYTE [rbx]
+                    ; mov   rax, QWORD putchar as *const () as _
+                    ; call  rax
                 ),
-                ir::IR::GETCHAR => {}
+                ir::IR::GETCHAR => dynasm!(ops
+                    ; mov   rax, QWORD getchar as *const () as _
+                    ; call  rax
+                    ; mov   BYTE [rbx], al
+                ),
                 ir::IR::JIZ(_) => {
                     let l = ops.new_dynamic_label();
                     let r = ops.new_dynamic_label();

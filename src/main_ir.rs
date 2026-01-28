@@ -25,7 +25,7 @@ impl Interpreter {
                 break;
             }
             match code.instrs[pc] {
-                ir::IR::SHL(x) => ps = if ps == 0 { 0 } else { ps - x as usize },
+                ir::IR::SHL(x) => ps = ps.saturating_sub(x as usize),
                 ir::IR::SHR(x) => {
                     ps += x as usize;
                     if ps >= self.stack.len() {
